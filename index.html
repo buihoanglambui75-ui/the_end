@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Hộp quà sinh nhật</title>
+<style>
+:root{box-sizing:border-box}
+*{box-sizing:inherit}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  display:flex;justify-content:center;align-items:center;
+  background:radial-gradient(circle at center,#211a3b 0%,#111 55%,#080808 100%);
+  font-family:Arial,sans-serif;
+}
+.credit{position:fixed;top:12px;left:15px;color:#888;font-size:12px;opacity:.8;z-index:1000}
+
+/* ===== GIFT BOX ===== */
+.gift-container{
+  position:relative;width:300px;height:350px;
+  display:flex;justify-content:center;align-items:center;
+  cursor:pointer;transform:translateY(80px);
+  transition:transform 1.5s cubic-bezier(.22,.61,.36,1);
+}
+.gift-container.move-right{transform:translate(calc(50vw - 200px),80px)}
+
+.glow{
+  position:absolute;bottom:30px;width:230px;height:45px;
+  background:#8e6cff;border-radius:50%;filter:blur(25px);opacity:.35;
+  transition:background 1s ease,opacity .5s ease,transform .5s ease;
+}
+.gift-container:hover .glow{opacity:.65;transform:scale(1.15)}
+.gift-container.open .glow{opacity:.9;transform:scale(1.3)}
+
+.light{
+  position:absolute;left:100px;bottom:145px;width:100px;height:80px;
+  background:#ffd86b;border-radius:50%;filter:blur(25px);opacity:0;transition:.5s;
+}
+.gift-container.open .light{opacity:1;animation:lightPulse 1s infinite alternate}
+@keyframes lightPulse{from{transform:scale(.8);opacity:.6}to{transform:scale(1.3);opacity:1}}
+
+/* ===== MESSAGE TEXT ===== */
+.message{
+  position:absolute;left:50%;bottom:125px;white-space:nowrap;
+  color:#ffd86b;font-size:25px;font-weight:bold;
+  text-shadow:0 0 5px #ffd86b,0 0 15px #ff9f00,0 0 30px #ff7b00;
+  opacity:0;pointer-events:none;
+}
+.message.show{animation:messageFly 6.5s cubic-bezier(.17,.67,.24,1.2) forwards}
+@keyframes messageFly{
+  0%{opacity:0;transform:translate(-50%,20px) scale(.25) rotate(-8deg)}
+  14%{opacity:1;transform:translate(-50%,5px) scale(.27) rotate(3deg)}
+  29%{transform:translate(-50%,-55px) scale(.29) rotate(-3deg)}
+  44%{transform:translate(-50%,-115px) scale(.32) rotate(2deg)}
+  52%{transform:translate(-50%,-145px) scale(.65) rotate(-2deg)}
+  60%{transform:translate(-50%,-190px) scale(1.15) rotate(1deg)}
+  65%{transform:translate(-50%,-205px) scale(1.15) rotate(0)}
+  88%{transform:translate(-50%,-205px) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-215px) scale(1.1)}
+}
+.message.short{animation:shortMessage 3.3s cubic-bezier(.17,.67,.24,1.2) forwards}
+@keyframes shortMessage{
+  0%{opacity:0;transform:translate(-50%,20px) scale(.25) rotate(-5deg)}
+  21%{opacity:1;transform:translate(-50%,-80px) scale(.45) rotate(3deg)}
+  37%{transform:translate(-50%,-150px) scale(1.15) rotate(-2deg)}
+  83%{transform:translate(-50%,-205px) scale(1.15) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-215px) scale(1.1)}
+}
+.message.birthday-message{
+  color:#ffd84d;font-size:28px;
+  text-shadow:0 0 5px #fff4a3,0 0 15px #ffd84d,0 0 30px #ff9f00;
+  animation:birthdayMessage 4.9s cubic-bezier(.17,.67,.24,1.2) forwards;
+}
+@keyframes birthdayMessage{
+  0%{opacity:0;transform:translate(-50%,30px) scale(.3) rotate(-8deg)}
+  23%{opacity:1;transform:translate(-50%,-100px) scale(.6) rotate(4deg)}
+  41%{transform:translate(-50%,-205px) scale(1.2) rotate(-2deg)}
+  72%{transform:translate(-50%,-205px) scale(1.15) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-220px) scale(1.1) rotate(2deg)}
+}
+
+/* ===== BOX BODY ===== */
+.gift{position:relative;width:170px;height:140px;transform-style:preserve-3d;z-index:5}
+.gift-container:not(.open):hover .gift{transform:translateY(-5px) scale(1.04);transition:transform .4s ease}
+
+.box{
+  position:absolute;bottom:20px;left:10px;width:150px;height:110px;
+  background:linear-gradient(135deg,#8064ff,#5638c9);border-radius:5px;
+  box-shadow:inset 0 0 20px rgba(255,255,255,.15),0 15px 30px rgba(0,0,0,.5);
+  transition:background 1s ease;
+}
+.ribbon-vertical{
+  position:absolute;left:65px;bottom:20px;width:40px;height:110px;
+  background:linear-gradient(90deg,#ff4f9a,#ff75b0,#ff4f9a);z-index:2;
+}
+.ribbon-horizontal{
+  position:absolute;left:10px;bottom:75px;width:150px;height:30px;
+  background:linear-gradient(180deg,#ff75b0,#ff3f91);z-index:4;
+}
+.lid{
+  position:absolute;left:0;bottom:115px;width:170px;height:38px;
+  background:linear-gradient(135deg,#9b83ff,#684de0);border-radius:6px;
+  z-index:10;transform-origin:bottom center;
+}
+.ribbon-lid{position:absolute;left:65px;top:0;width:40px;height:38px;background:#ff5ba3}
+
+.bow{position:absolute;top:-35px;left:52px;width:65px;height:40px;z-index:12}
+.bow-left,.bow-right{
+  position:absolute;width:45px;height:30px;
+  background:linear-gradient(135deg,#ff72b2,#ff318d);border-radius:50% 50% 10% 50%;
+}
+.bow-left{left:-12px;transform:rotate(25deg)}
+.bow-right{right:-12px;transform:rotate(-25deg)}
+.bow-center{
+  position:absolute;left:23px;top:8px;width:22px;height:22px;
+  background:#ff3d91;border-radius:50%;box-shadow:0 0 10px #ff4f9a;
+}
+
+.gift-container.open .lid,.gift-container.open .bow{
+  animation:flyAway 3.8s cubic-bezier(.25,.46,.45,.94) forwards;
+}
+@keyframes flyAway{
+  0%{opacity:1;transform:translateY(0) rotate(0)}
+  15%{transform:translateY(-95px) rotate(-10deg)}
+  30%{transform:translateY(-125px) rotate(-16deg)}
+  50%{opacity:.9;transform:translateY(-60px) rotate(8deg)}
+  70%{opacity:.65;transform:translateY(60px) rotate(20deg)}
+  85%{opacity:.3;transform:translateY(160px) rotate(35deg)}
+  100%{opacity:0;transform:translateY(300px) rotate(55deg)}
+}
+
+.gift-container.shake .gift{animation:giftShake .6s ease}
+@keyframes giftShake{
+  0%{transform:scale(1)}
+  30%{transform:scale(1.08) rotate(-2deg)}
+  60%{transform:scale(1.05) rotate(2deg)}
+  100%{transform:scale(1)}
+}
+
+.text{position:absolute;bottom:0;color:#ddd;font-size:14px;opacity:.7;white-space:nowrap;z-index:20}
+.gift-container:not(.open):hover .text{color:#fff;opacity:1}
+
+/* ===== BIRTHDAY COLOR THEME ===== */
+.gift-container.birthday .box{
+  background:linear-gradient(135deg,#ff6b9a,#ff3d68);
+  box-shadow:inset 0 0 20px rgba(255,255,255,.2),0 15px 30px rgba(255,70,100,.35);
+}
+.gift-container.birthday .ribbon-vertical{background:linear-gradient(90deg,#ffd84d,#fff09a,#ffd84d)}
+.gift-container.birthday .ribbon-horizontal{background:linear-gradient(180deg,#ffd84d,#ffbd22)}
+.gift-container.birthday .lid{background:linear-gradient(135deg,#ff8fb1,#ff4774)}
+.gift-container.birthday .ribbon-lid{background:#ffd84d}
+.gift-container.birthday .bow-left,.gift-container.birthday .bow-right{
+  background:linear-gradient(135deg,#ffd84d,#ffb300);
+}
+.gift-container.birthday .bow-center{background:#ffb300;box-shadow:0 0 15px #ffd84d}
+.gift-container.birthday .glow{background:#ff5c8a;opacity:.55}
+
+/* ===== CAKE ===== */
+.cake-container{
+  position:fixed;left:3vw;top:var(--cake-top,100vh);width:400px;height:430px;
+  z-index:50;pointer-events:none;opacity:0;
+  transform:translateY(500px) scale(.75) rotate(-6deg);transform-origin:center bottom;
+}
+.cake-container.show{animation:cakeFlyIn 2.2s cubic-bezier(.22,.61,.36,1) forwards}
+/* Sau khi bánh đã bay vào xong, khóa cứng trạng thái hiển thị - không animation nào được phép làm mờ/ẩn nó nữa */
+.cake-container.settled{animation:none !important;opacity:1 !important;transform:translateY(0) scale(1) rotate(0) !important}
+.cake-container.settled .cake-glow{animation:none;opacity:.6}
+@keyframes cakeFlyIn{
+  0%{opacity:0;transform:translateY(500px) scale(.75) rotate(-6deg)}
+  20%{opacity:1;transform:translateY(250px) scale(.88) rotate(4deg)}
+  55%{transform:translateY(80px) scale(.98) rotate(-3deg)}
+  78%{transform:translateY(-15px) scale(1.02) rotate(2deg)}
+  100%{transform:translateY(0) scale(1) rotate(0)}
+}
+.cake{position:absolute;left:35px;bottom:20px;width:320px;height:290px}
+.cake-glow{
+  position:absolute;left:15px;bottom:20px;width:290px;height:190px;
+  background:radial-gradient(ellipse,rgba(255,100,180,.5),transparent 70%);
+  filter:blur(35px);z-index:-1;animation:cakeGlow 1.5s infinite alternate;
+}
+@keyframes cakeGlow{from{transform:scale(.9);opacity:.4}to{transform:scale(1.1);opacity:.8}}
+.cake-plate{
+  position:absolute;left:5px;bottom:0;width:310px;height:28px;
+  background:linear-gradient(180deg,#fff,#ffd3e7);border-radius:50%;
+  box-shadow:0 12px 25px rgba(0,0,0,.45),inset 0 2px 5px rgba(255,255,255,.8);
+}
+.cake-bottom{
+  position:absolute;left:25px;bottom:20px;width:270px;height:78px;
+  background:linear-gradient(180deg,#ff9fc9,#ff4f94);border-radius:18px 18px 25px 25px;
+  box-shadow:inset 0 -12px 0 rgba(200,30,100,.18),0 10px 18px rgba(0,0,0,.3);
+}
+.cake-middle{
+  position:absolute;left:52px;bottom:86px;width:216px;height:65px;
+  background:linear-gradient(180deg,#ffe2ef,#ff91bc);border-radius:16px 16px 23px 23px;
+  box-shadow:0 6px 15px rgba(0,0,0,.2);
+}
+.cake-top{
+  position:absolute;left:82px;bottom:143px;width:156px;height:58px;
+  background:linear-gradient(180deg,#fff8fc,#ffc1dc);border-radius:17px 17px 23px 23px;
+  box-shadow:0 6px 12px rgba(0,0,0,.2);
+}
+.cream{
+  position:absolute;background:linear-gradient(180deg,#fffaff,#ffe6f2);
+  border-radius:0 0 18px 18px;z-index:3;box-shadow:0 3px 6px rgba(255,150,200,.25);
+}
+.cream.one{left:27px;bottom:75px;width:266px;height:22px}
+.cream.two{left:54px;bottom:138px;width:212px;height:20px}
+.cream.three{left:84px;bottom:195px;width:152px;height:18px}
+.cherry{
+  position:absolute;width:19px;height:19px;
+  background:radial-gradient(circle at 30% 25%,#ffb0c8,#ff315f 45%,#c9003d 100%);
+  border-radius:50%;box-shadow:0 3px 7px rgba(150,0,50,.4);z-index:6;
+}
+.cherry.one{left:60px;bottom:69px}
+.cherry.two{left:230px;bottom:70px}
+.cherry.three{left:130px;bottom:130px}
+.leaf{position:absolute;width:13px;height:7px;background:#55c96f;border-radius:100% 0 100% 0;z-index:7}
+.leaf.one{left:58px;bottom:87px;transform:rotate(-25deg)}
+.leaf.two{left:231px;bottom:88px;transform:rotate(25deg)}
+.leaf.three{left:128px;bottom:148px;transform:rotate(-15deg)}
+.sprinkle{position:absolute;width:10px;height:4px;border-radius:5px;z-index:7}
+.sprinkle.s1{left:95px;bottom:108px;background:#ffd84d;transform:rotate(20deg)}
+.sprinkle.s2{left:160px;bottom:108px;background:#65e6ff;transform:rotate(-20deg)}
+.sprinkle.s3{left:190px;bottom:108px;background:#a878ff;transform:rotate(15deg)}
+.sprinkle.s4{left:110px;bottom:47px;background:#fff;transform:rotate(-15deg)}
+.sprinkle.s5{left:175px;bottom:48px;background:#ffd84d;transform:rotate(25deg)}
+.candle{
+  position:absolute;left:152px;bottom:199px;width:20px;height:68px;border-radius:6px;
+  background:repeating-linear-gradient(135deg,#7d6cff 0,#7d6cff 7px,#fff 7px,#fff 13px);
+  box-shadow:0 0 12px rgba(130,110,255,.6);z-index:8;
+}
+.wick{position:absolute;left:160px;bottom:264px;width:4px;height:9px;background:#292929;border-radius:3px;z-index:9}
+.flame{
+  position:absolute;left:148px;bottom:268px;width:28px;height:42px;
+  background:radial-gradient(ellipse at center bottom,#fff 0%,#fff06a 30%,#ffae00 55%,#ff5a00 75%,transparent 76%);
+  border-radius:50% 50% 45% 45%;filter:drop-shadow(0 0 12px #ffd84d);
+  transform-origin:center bottom;z-index:10;animation:flameFlicker .45s infinite alternate;
+}
+@keyframes flameFlicker{from{transform:scale(.9) rotate(-4deg)}to{transform:scale(1.15) rotate(4deg)}}
+
+/* ===== CONFETTI ===== */
+.rain-confetti{position:fixed;top:-30px;width:9px;height:16px;opacity:0;pointer-events:none;z-index:900}
+.rain-confetti.falling{animation:fall linear forwards}
+@keyframes fall{
+  0%{transform:translateY(-30px) rotate(0deg);opacity:1}
+  100%{transform:translateY(110vh) rotate(720deg);opacity:0}
+}
+
+@media (max-width:800px){
+  .gift-container.move-right{transform:translate(calc(50vw - 150px),80px) scale(.85)}
+  .cake-container{left:-55px;transform-origin:center bottom}
+}
+
+/* ===== BIRTHDAY DATE GATE ===== */
+.birthday-check{
+  position:fixed;inset:0;z-index:2000;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at center,#211a3b 0%,#111 55%,#080808 100%);
+  transition:opacity .6s ease,visibility .6s ease;
+}
+.birthday-check.hide{opacity:0;visibility:hidden;pointer-events:none}
+
+.check-card{
+  position:relative;text-align:center;color:#eee;
+  background:rgba(255,255,255,.05);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;
+  padding:34px 38px;box-shadow:0 20px 40px rgba(0,0,0,.4);
+}
+.check-label{margin:0 0 16px;font-size:16px;color:#ddd}
+.check-input{
+  padding:9px 12px;border-radius:8px;font-size:15px;margin-right:10px;
+  background:#1c1730;color:#fff;border:1px solid #4b3f8a;
+  color-scheme:dark;
+}
+.check-btn{
+  padding:9px 20px;border:none;border-radius:8px;font-size:15px;font-weight:bold;
+  color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,#8064ff,#5638c9);
+  box-shadow:0 6px 16px rgba(100,70,220,.4);
+  transition:filter .2s ease,transform .2s ease;
+}
+.check-btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+
+.chat-bubble{
+  position:absolute;top:-56px;left:50%;
+  transform:translateX(-50%) scale(.6);
+  background:#fff;color:#3a2f5c;
+  padding:10px 18px;border-radius:14px;
+  font-size:14px;font-weight:bold;white-space:nowrap;
+  opacity:0;pointer-events:none;
+  box-shadow:0 8px 18px rgba(0,0,0,.35);
+  transition:opacity .25s ease;
+}
+.chat-bubble::after{
+  content:"";position:absolute;bottom:-8px;left:50%;
+  transform:translateX(-50%);
+  border-width:8px 8px 0;border-style:solid;
+  border-color:#fff transparent transparent;
+}
+.chat-bubble.show{opacity:1;animation:bubblePop .35s ease}
+@keyframes bubblePop{
+  0%{transform:translateX(-50%) scale(.5) rotate(-4deg)}
+  60%{transform:translateX(-50%) scale(1.08) rotate(2deg)}
+  100%{transform:translateX(-50%) scale(1) rotate(0)}
+}
+</style>
+</head>
+<body>
+
+<div class="credit">Nguoi Thuc Vat</div>
+
+<!-- ===== BIRTHDAY DATE GATE ===== -->
+<div class="birthday-check" id="birthdayCheck">
+  <div class="check-card">
+    <div class="chat-bubble" id="chatBubble"></div>
+    <p class="check-label">🎂 Nhập ngày sinh của bạn:</p>
+    <input
+      type="date"
+      id="birthdayInput"
+      class="check-input"
+      onkeydown="if(event.key==='Enter') checkBirthday()"
+    >
+    <button class="check-btn" onclick="checkBirthday()">Xác nhận</button>
+  </div>
+</div>
+
+<div class="gift-container" id="gift" onclick="handleGiftClick()">
+  <div class="glow"></div>
+  <div class="light"></div>
+  <div class="message" id="message">😄 Không có gì =))</div>
+  <div class="gift">
+    <div class="box"></div>
+    <div class="ribbon-vertical"></div>
+    <div class="ribbon-horizontal"></div>
+    <div class="lid"><div class="ribbon-lid"></div></div>
+    <div class="bow">
+      <div class="bow-left"></div>
+      <div class="bow-right"></div>
+      <div class="bow-center"></div>
+    </div>
+  </div>
+  <div class="text" id="text">🎁 Bấm vào hộp quà</div>
+</div>
+
+<div class="cake-container" id="cake">
+  <div class="cake">
+    <div class="cake-glow"></div>
+    <div class="cake-plate"></div>
+    <div class="cake-bottom"></div>
+    <div class="cake-middle"></div>
+    <div class="cake-top"></div>
+    <div class="cream one"></div>
+    <div class="cream two"></div>
+    <div class="cream three"></div>
+    <div class="cherry one"></div>
+    <div class="cherry two"></div>
+    <div class="cherry three"></div>
+    <div class="leaf one"></div>
+    <div class="leaf two"></div>
+    <div class="leaf three"></div>
+    <div class="sprinkle s1"></div>
+    <div class="sprinkle s2"></div>
+    <div class="sprinkle s3"></div>
+    <div class="sprinkle s4"></div>
+    <div class="sprinkle s5"></div>
+    <div class="candle"></div>
+    <div class="wick"></div>
+    <div class="flame"></div>
+  </div>
+</div>
+
+<script>
+const gift = document.getElementById("gift");
+const text = document.getElementById("text");
+const message = document.getElementById("message");
+const cake = document.getElementById("cake");
+const birthdayCheck = document.getElementById("birthdayCheck");
+const birthdayInput = document.getElementById("birthdayInput");
+const chatBubble = document.getElementById("chatBubble");
+let bubbleTimer = null;
+
+// So sánh ngày/tháng người dùng nhập với ngày/tháng thực tế (không so năm, vì sinh nhật lặp lại hàng năm)
+function checkBirthday() {
+  const val = birthdayInput.value;
+  if (!val) {
+    showBubble("Chọn ngày đi đã 😅");
+    return;
+  }
+
+  const chosen = new Date(val + "T00:00:00");
+  const today = new Date();
+  const isToday =
+    chosen.getDate() === today.getDate() &&
+    chosen.getMonth() === today.getMonth();
+
+  if (isToday) {
+    birthdayCheck.classList.add("hide");
+    setTimeout(openGift, 650); // đợi màn hình nhập mờ đi rồi chạy phân đoạn mở quà
+  } else {
+    showBubble("Không phải hôm nay òi 😅");
+  }
+}
+
+function showBubble(txt) {
+  chatBubble.textContent = txt;
+  chatBubble.classList.remove("show");
+  void chatBubble.offsetWidth; // reset animation
+  chatBubble.classList.add("show");
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => chatBubble.classList.remove("show"), 2200);
+}
+
+let opened = false;
+let sequenceRunning = false;
+let finished = false; // true sau khi bánh kem đã hiện ra lần cuối -> khóa vĩnh viễn
+
+// Danh sách các bước "trêu đùa" chạy tuần tự: [nội dung, class animation, thời gian chờ trước bước kế]
+const teaseSteps = [
+  { text: "😄 Không có gì =))", cls: "show", wait: 6500 },
+  { text: "😂 Đùa đấy",              cls: "short", wait: 3300 },
+  { text: "🔄 Làm lại đi",           cls: "short", wait: 3300 },
+];
+
+function setMessage(txt, cls) {
+  message.className = "message";
+  message.innerHTML = txt;
+  void message.offsetWidth; // reset animation
+  if (cls) message.classList.add(cls);
+}
+
+function runTeaseStep(i) {
+  if (i >= teaseSteps.length) return finishSequence();
+  const step = teaseSteps[i];
+  if (i > 0) setMessage(step.text, step.cls); // bước 0 đã set sẵn lúc mở hộp
+  setTimeout(() => runTeaseStep(i + 1), step.wait);
+}
+
+function handleGiftClick() {
+  if (finished || sequenceRunning) return;
+  if (gift.classList.contains("birthday") && !opened) {
+    showBirthdayMessage();
+  } else if (!opened) {
+    openGift();
+  }
+}
+
+function openGift() {
+  gift.classList.remove("birthday");
+  setMessage(teaseSteps[0].text, "");
+  gift.classList.add("open", "shake");
+  opened = true;
+  sequenceRunning = true;
+  text.innerHTML = "🎁 Đang mở quà...";
+
+  setTimeout(() => message.classList.add("show"), 250);
+  createConfetti();
+  setTimeout(() => runTeaseStep(1), teaseSteps[0].wait);
+}
+
+function finishSequence() {
+  setMessage("", "");
+  gift.classList.remove("open", "shake");
+  setTimeout(() => gift.classList.add("birthday"), 700);
+  text.innerHTML = "🎂 Bấm vào hộp quà";
+  opened = false;
+  sequenceRunning = false;
+}
+
+function showBirthdayMessage() {
+  sequenceRunning = true;
+  opened = true;
+  gift.classList.add("open", "shake");
+  text.innerHTML = "🎉 Chúc mừng sinh nhật!";
+  setMessage("🎂 Sinh nhật vui vẻ! 🎉", "birthday-message");
+  createConfetti();
+
+  setTimeout(() => {
+    setMessage("", "");
+    gift.classList.remove("open", "shake");
+
+    // Tính vị trí đáy hộp để đặt bánh kem đúng chỗ
+    const boxBottom = gift.querySelector(".box").getBoundingClientRect().bottom;
+    cake.style.setProperty("--cake-top", (boxBottom - 410) + "px");
+
+    gift.classList.add("move-right");
+    cake.classList.remove("show", "settled");
+    void cake.offsetWidth;
+    cake.classList.add("show");
+    cake.addEventListener("animationend", function lockCake(e) {
+      if (e.animationName === "cakeFlyIn") {
+        cake.classList.add("settled"); // khóa cứng, bánh kem giữ nguyên vĩnh viễn
+        cake.removeEventListener("animationend", lockCake);
+      }
+    });
+
+    createConfetti();
+    text.innerHTML = "🎉 Chúc mừng sinh nhật!";
+    sequenceRunning = false;
+    finished = true; // bánh kem giữ nguyên vĩnh viễn, không còn thao tác nào ẩn nó nữa
+  }, 4900);
+}
+
+function createConfetti() {
+  const colors = ["#ff4f9a","#ffd84d","#5ee7ff","#a878ff","#ff914d","#7dff82","#ffffff"];
+  for (let i = 0; i < 100; i++) {
+    const c = document.createElement("div");
+    c.className = "rain-confetti";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.width = (Math.random() * 7 + 5) + "px";
+    c.style.height = (Math.random() * 12 + 8) + "px";
+    c.style.animationDuration = (Math.random() * 3 + 2) + "s";
+    c.style.animationDelay = (Math.random() * 1.2) + "s";
+    c.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+    document.body.appendChild(c);
+    requestAnimationFrame(() => c.classList.add("falling"));
+    setTimeout(() => c.remove(), 6000);
+  }
+}
+</script>
+</body>
+</html>
